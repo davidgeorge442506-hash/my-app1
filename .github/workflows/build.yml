@@ -15,8 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Fix git permissions
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Fix git permissions and disable root warning
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          sed -i 's/^#\?\s*warn_on_root\s*=.*/warn_on_root = 0/' buildozer.spec
 
       - name: Build APK with Buildozer
         run: |

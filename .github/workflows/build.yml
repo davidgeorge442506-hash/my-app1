@@ -8,20 +8,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: kivy/buildozer:latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: stable
+      - name: Fix git permissions
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build APK with Buildozer
+        run: |
+          buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: my-android-app
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: bin/*.apk

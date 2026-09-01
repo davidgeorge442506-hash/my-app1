@@ -8,8 +8,6 @@ from kivy.core.audio import SoundLoader
 from arabic_reshaper import reshape
 from bidi.algorithm import get_display
 from kivy.clock import Clock
-import os
-os.environ['KIVY_AUDIO'] = 'ffpyplayer'
 text = get_display(reshape("ترانيم"))
 text1 = get_display(reshape("احكي يا تاريخ"))
 text2 = get_display(reshape("►مارمينا"))

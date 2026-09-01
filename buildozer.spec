@@ -1,8 +1,3 @@
-# This .spec config file tells Buildozer an app's requirements for being built.
-#
-# It largely follows the syntax of an .ini file.
-# See the end of the file for more details and warnings about common mistakes.
-
 [app]
 
 # (str) Title of your application
@@ -17,30 +12,31 @@ package.domain = org.test
 # (str) Source code where the main.py live
 source.dir = .
 
-# (list) Source files to include (leave empty to include all the files)
+# (list) Source files to include
 source.include_exts = py,png,jpg,kv,atlas,ttf,mp3,wav,ogg
 
+# (str) Application versioning
+version = 0.1
+
 # (list) Application requirements
-# comma separated e.g. requirements = sqlite3,kivy
 requirements = python3,kivy,arabic_reshaper,python-bidi
 
 # (list) Supported orientations
-# Valid options are: landscape, portrait, portrait-reverse, landscape-reverse, or all
 orientation = portrait
 
 # Kivy version to use
 osx.kivy_version = 2.2.0
 
-# (bool) Indicate if the application should be fullscreen or not
+# (bool) Indicate if the application should be fullscreen
 fullscreen = 0
 
-# (bool) If True, then automatically accept SDK license agreements.
+# (bool) Automatically accept SDK license agreements
 android.accept_sdk_license = True
 
-# (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
+# (list) The Android archs to build for
 android.archs = arm64-v8a, armeabi-v7a
 
-# (bool) enables Android auto backup feature (Android API >=23)
+# (bool) Enables Android auto backup feature
 android.allow_backup = True
 
 #
@@ -54,8 +50,8 @@ ios.codesign.allowed = false
 
 [buildozer]
 
-# (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
+# (int) Log level (0 = error only, 1 = info, 2 = debug)
 log_level = 2
 
-# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
+# (int) Display warning if buildozer is run as root
 warn_on_root = 0

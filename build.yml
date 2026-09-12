@@ -14,112 +14,190 @@ on:
 env:
   BUILD_NUMBER: 1
   BUILD_VERSION: 1.0.0
-  PYTHON_VERSION: 3.12.2
-  FLUTTER_VERSION: 3.22.2
+  PYTHON_VERSION: "3.12"
+  FLUTTER_VERSION: "3.24.0"
 
 jobs:
   build-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-      - uses: actions/setup-python@v5
+          channel: 'stable'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
+
+      - name: Install Python Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install flet
+
       - name: Build Android APK
         run: |
-          yes | flet build apk
-      - uses: actions/upload-artifact@v4
+          flet build apk --flutter-sdk-path "$FLUTTER_ROOT" --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/apk
+          path: build/apk/*.apk
 
   build-aab:
+    name: Build Android App Bundle (AAB)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-      - uses: actions/setup-python@v5
+          channel: 'stable'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
+
+      - name: Install Python Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install flet
-      - name: Build Android App Bundle (AAB)
+
+      - name: Build Android AAB
         run: |
-          yes | flet build aab
-      - uses: actions/upload-artifact@v4
+          flet build aab --flutter-sdk-path "$FLUTTER_ROOT" --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: android-aab
-          path: build/aab
+          path: build/aab/*.aab
 
   build-windows:
+    name: Build Windows App
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
+
+      - name: Install Python Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install flet
+
       - name: Build Windows Executable
-        shell: cmd
+        shell: powershell
         run: |
-          echo y | flet build windows
-      - uses: actions/upload-artifact@v4
+          $env:FLUTTER_ROOT = (Get-Command flutter).Source | Split-Path -Parent | Split-Path -Parent
+          flet build windows --flutter-sdk-path "$env:FLUTTER_ROOT" --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: build/windows
+          path: build/windows/
 
   build-linux:
+    name: Build Linux App
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install Linux Build Dependencies
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
-      - name: Install Python dependencies
-        run: |
-          pip install --upgrade pip
-          pip install flet
-      - name: Build Linux Package
-        run: |
-          yes | flet build linux
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux-app
-          path: build/linux
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++6
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
+
+      - name: Install Python Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install flet
-      - name: Build macOS App
+
+      - name: Build Linux Package
         run: |
-          yes | flet build macos
-      - uses: actions/upload-artifact@v4
+          flet build linux --flutter-sdk-path "$FLUTTER_ROOT" --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-app
+          path: build/linux/
+
+  build-macos:
+    name: Build macOS App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Build macOS Executable
+        run: |
+          flet build macos --flutter-sdk-path "$FLUTTER_ROOT" --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: macos-app
-          path: build/macos
+          path: build/macos/

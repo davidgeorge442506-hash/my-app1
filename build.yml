@@ -1,5 +1,4 @@
-name: All Builds (Linux, macOS, Windows, Android,apk
-)
+name: All Builds (Linux, macOS, Windows, Android,apk)
 
 on:
   push:
@@ -49,7 +48,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          flet build apk --yes --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          yes | flet build apk --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -80,8 +79,9 @@ jobs:
           pip install flet
 
       - name: Build Windows
+        shell: powershell
         run: |
-          flet build windows --yes --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          echo "y" | flet build windows --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
@@ -118,7 +118,7 @@ jobs:
 
       - name: Build Linux
         run: |
-          flet build linux --yes --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          yes | flet build linux --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
@@ -150,7 +150,7 @@ jobs:
 
       - name: Build macOS
         run: |
-          flet build macos --yes --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          yes | flet build macos --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4

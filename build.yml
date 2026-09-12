@@ -1,4 +1,4 @@
-name: All Builds (Linux, macOS, Windows, Android,apk)
+name: All Builds (Linux, macOS, Windows, Android)
 
 on:
   push:
@@ -15,7 +15,8 @@ env:
   BUILD_NUMBER: 1
   BUILD_VERSION: 1.0.0
   PYTHON_VERSION: 3.12.2
-  FLUTTER_VERSION: 3.22.2
+  FLUTTER_VERSION: 3.24.0 # أو يمكنك تركها محددة
+  CI: true # يمنع الطلبات التفاعلية في العديد من الأدوات
 
 jobs:
   build-android:
@@ -48,7 +49,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          yes | flet build apk --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          printf 'y\ny\ny\n' | flet build apk --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -79,9 +80,9 @@ jobs:
           pip install flet
 
       - name: Build Windows
-        shell: powershell
+        shell: cmd
         run: |
-          echo "y" | flet build windows --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          echo y | flet build windows --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
@@ -118,7 +119,7 @@ jobs:
 
       - name: Build Linux
         run: |
-          yes | flet build linux --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          printf 'y\ny\ny\n' | flet build linux --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
@@ -150,7 +151,7 @@ jobs:
 
       - name: Build macOS
         run: |
-          yes | flet build macos --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
+          printf 'y\ny\ny\n' | flet build macos --build-number ${{ env.BUILD_NUMBER }} --build-version ${{ env.BUILD_VERSION }}
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4

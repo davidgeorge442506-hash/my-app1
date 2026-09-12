@@ -29,9 +29,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Flutter
+      # تثبيت إصدار Flutter المطلوبة خصيصاً من Flet لتفادي طلب التثبيت التفاعلي
+      - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Install dependencies
@@ -42,9 +44,16 @@ jobs:
       - name: Build Android APK
         env:
           CI: 'true'
-          PYTHONUNBUFFERED: '1'
         run: |
-          printf 'y\ny\ny\n' | flet build apk --no-interactive --build-number 1 --build-version 1.0.0 || printf 'y\ny\ny\n' | flet build apk --build-number 1 --build-version 1.0.0
+          python -c "
+          import os, subprocess
+          os.environ['CI'] = 'true'
+          cmd = ['flet', 'build', 'apk', '--no-interactive', '--build-number', '1', '--build-version', '1.0.0']
+          p = subprocess.Popen(cmd, stdin=subprocess.PIPE, text=True)
+          p.communicate(input='y\ny\ny\n')
+          if p.returncode != 0:
+              exit(p.returncode)
+          "
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

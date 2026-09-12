@@ -39,8 +39,12 @@ jobs:
           pip install flet
 
       - name: Build Android APK
+        env:
+          CI: 'true'
+          CI_BUILD: 'true'
+          FLUTTER_ROOT: ${{ steps.flutter.outputs.flutter-path }}
         run: |
-          yes | flet build apk --build-number 1 --build-version 1.0.0
+          flet build apk --yes --build-number 1 --build-version 1.0.0 < /dev/null
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -71,6 +75,8 @@ jobs:
           pip install flet
 
       - name: Build Windows Executable
+        env:
+          CI: 'true'
         run: |
           flet build windows --yes
 
@@ -108,8 +114,10 @@ jobs:
           pip install flet
 
       - name: Build Linux App
+        env:
+          CI: 'true'
         run: |
-          yes | flet build linux
+          flet build linux --yes < /dev/null
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
@@ -140,8 +148,10 @@ jobs:
           pip install flet
 
       - name: Build macOS App
+        env:
+          CI: 'true'
         run: |
-          yes | flet build macos
+          flet build macos --yes < /dev/null
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4

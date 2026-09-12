@@ -15,7 +15,7 @@ env:
   BUILD_NUMBER: 1
   BUILD_VERSION: 1.0.0
   PYTHON_VERSION: 3.12.2
-  FLUTTER_VERSION: 3.24.0
+  FLUTTER_VERSION: 3.22.2
 
 jobs:
   build-windows:
@@ -30,7 +30,7 @@ jobs:
           pip install --upgrade pip
           pip install flet
       - name: Build Windows Executable
-        run: flet build windows --yes
+        run: flet build windows
       - uses: actions/upload-artifact@v4
         with:
           name: windows-app
@@ -51,7 +51,7 @@ jobs:
           pip install --upgrade pip
           pip install flet
       - name: Build Android APK
-        run: flet build apk --yes
+        run: flet build apk
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
@@ -72,7 +72,7 @@ jobs:
           pip install --upgrade pip
           pip install flet
       - name: Build Android App Bundle (AAB)
-        run: flet build aab --yes
+        run: flet build aab
       - uses: actions/upload-artifact@v4
         with:
           name: android-aab
@@ -94,7 +94,7 @@ jobs:
           pip install --upgrade pip
           pip install flet
       - name: Build Linux Package
-        run: flet build linux --yes
+        run: flet build linux
       - uses: actions/upload-artifact@v4
         with:
           name: linux-app
@@ -112,8 +112,9 @@ jobs:
           pip install --upgrade pip
           pip install flet
       - name: Build macOS App
-        run: flet build macos --yes
+        run: flet build macos
       - uses: actions/upload-artifact@v4
         with:
           name: macos-app
           path: build/macos
+          

@@ -1,17 +1,25 @@
-name: Build Android APK
+name: All Builds (Linux, macOS, Windows, Android, APK, AAB)
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
   workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.12"
 
 jobs:
   build-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Java JDK
         uses: actions/setup-java@v4
@@ -19,13 +27,207 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build APK using Flet Action
-        uses: flet-dev/flet-build-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          target: apk
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Flet
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Bypass Flet Interactive Prompt
+        run: |
+          python -c "
+          import site, os
+          for sp in site.getsitepackages():
+              target = os.path.join(sp, 'flet_cli', 'commands', 'flutter_base.py')
+              if os.path.exists(target):
+                  with open(target, 'r', encoding='utf-8') as f:
+                      code = f.read()
+                  code = code.replace('return Confirm.ask(prompt, default=True)', 'return True')
+                  with open(target, 'w', encoding='utf-8') as f:
+                      f.write(code)
+                  print('Flet patched successfully!')
+          "
+
+      - name: Build Android APK
+        run: flet build apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/apk/*.apk
+          path: build/apk
+
+  build-aab:
+    name: Build Android AAB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Flet
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Bypass Flet Interactive Prompt
+        run: |
+          python -c "
+          import site, os
+          for sp in site.getsitepackages():
+              target = os.path.join(sp, 'flet_cli', 'commands', 'flutter_base.py')
+              if os.path.exists(target):
+                  with open(target, 'r', encoding='utf-8') as f:
+                      code = f.read()
+                  code = code.replace('return Confirm.ask(prompt, default=True)', 'return True')
+                  with open(target, 'w', encoding='utf-8') as f:
+                      f.write(code)
+                  print('Flet patched successfully!')
+          "
+
+      - name: Build Android AAB
+        run: flet build aab
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/aab
+
+  build-windows:
+    name: Build Windows Executable
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Flet
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Bypass Flet Interactive Prompt
+        run: |
+          python -c "
+          import site, os
+          for sp in site.getsitepackages():
+              target = os.path.join(sp, 'flet_cli', 'commands', 'flutter_base.py')
+              if os.path.exists(target):
+                  with open(target, 'r', encoding='utf-8') as f:
+                      code = f.read()
+                  code = code.replace('return Confirm.ask(prompt, default=True)', 'return True')
+                  with open(target, 'w', encoding='utf-8') as f:
+                      f.write(code)
+                  print('Flet patched successfully!')
+          "
+
+      - name: Build Windows Executable
+        run: flet build windows
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-app
+          path: build/windows
+
+  build-linux:
+    name: Build Linux Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Linux Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Install Flet
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Bypass Flet Interactive Prompt
+        run: |
+          python -c "
+          import site, os
+          for sp in site.getsitepackages():
+              target = os.path.join(sp, 'flet_cli', 'commands', 'flutter_base.py')
+              if os.path.exists(target):
+                  with open(target, 'r', encoding='utf-8') as f:
+                      code = f.read()
+                  code = code.replace('return Confirm.ask(prompt, default=True)', 'return True')
+                  with open(target, 'w', encoding='utf-8') as f:
+                      f.write(code)
+                  print('Flet patched successfully!')
+          "
+
+      - name: Build Linux Package
+        run: flet build linux
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-app
+          path: build/linux
+
+  build-macos:
+    name: Build macOS App
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Flet
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      - name: Bypass Flet Interactive Prompt
+        run: |
+          python -c "
+          import site, os
+          for sp in site.getsitepackages():
+              target = os.path.join(sp, 'flet_cli', 'commands', 'flutter_base.py')
+              if os.path.exists(target):
+                  with open(target, 'r', encoding='utf-8') as f:
+                      code = f.read()
+                  code = code.replace('return Confirm.ask(prompt, default=True)', 'return True')
+                  with open(target, 'w', encoding='utf-8') as f:
+                      f.write(code)
+                  print('Flet patched successfully!')
+          "
+
+      - name: Build macOS App
+        run: flet build macos
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          path: build/macos

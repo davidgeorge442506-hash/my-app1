@@ -29,30 +29,37 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # تثبيت إصدار Flutter المطلوبة خصيصاً من Flet لتفادي طلب التثبيت التفاعلي
-      - name: Set up Flutter SDK
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install flet
 
+      # تشغيل الأمر داخل Pseudo-terminal (pty) خدعة لإقناع Flet بأن الشاشة تفاعلية وتلقيم خيار الإجابة نعم تلقائياً
       - name: Build Android APK
-        env:
-          CI: 'true'
         run: |
           python -c "
-          import os, subprocess
-          os.environ['CI'] = 'true'
-          cmd = ['flet', 'build', 'apk', '--no-interactive', '--build-number', '1', '--build-version', '1.0.0']
-          p = subprocess.Popen(cmd, stdin=subprocess.PIPE, text=True)
-          p.communicate(input='y\ny\ny\n')
-          if p.returncode != 0:
-              exit(p.returncode)
+          import pty, os, subprocess
+
+          master, slave = pty.openpty()
+          cmd = ['flet', 'build', 'apk', '--build-number', '1', '--build-version', '1.0.0']
+          proc = subprocess.Popen(cmd, stdin=slave, stdout=slave, stderr=slave, close_fds=True)
+          os.close(slave)
+
+          # إرسال الإجابة تلقائياً للطرفية التفاعلية
+          os.write(master, b'y\n')
+          
+          while True:
+              try:
+                  data = os.read(master, 1024)
+                  if not data:
+                      break
+                  print(data.decode('utf-8', errors='ignore'), end='')
+              except OSError:
+                  break
+
+          proc.wait()
+          if proc.returncode != 0:
+              exit(proc.returncode)
           "
 
       - name: Upload APK Artifact

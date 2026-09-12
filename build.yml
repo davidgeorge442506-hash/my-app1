@@ -34,33 +34,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install flet
 
-      # تشغيل الأمر داخل Pseudo-terminal (pty) خدعة لإقناع Flet بأن الشاشة تفاعلية وتلقيم خيار الإجابة نعم تلقائياً
       - name: Build Android APK
+        env:
+          CI: 'true'
         run: |
-          python -c "
-          import pty, os, subprocess
-
-          master, slave = pty.openpty()
-          cmd = ['flet', 'build', 'apk', '--build-number', '1', '--build-version', '1.0.0']
-          proc = subprocess.Popen(cmd, stdin=slave, stdout=slave, stderr=slave, close_fds=True)
-          os.close(slave)
-
-          # إرسال الإجابة تلقائياً للطرفية التفاعلية
-          os.write(master, b'y\n')
-          
-          while True:
-              try:
-                  data = os.read(master, 1024)
-                  if not data:
-                      break
-                  print(data.decode('utf-8', errors='ignore'), end='')
-              except OSError:
-                  break
-
-          proc.wait()
-          if proc.returncode != 0:
-              exit(proc.returncode)
-          "
+          flet build apk --yes --build-number 1 --build-version 1.0.0
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

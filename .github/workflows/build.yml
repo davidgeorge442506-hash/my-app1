@@ -18,56 +18,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Java JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Set up Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install flet
 
-      - name: Build Android APK with Auto Answer
+      - name: Build Android APK with Auto-Approve
+        env:
+          CI: 'true'
         run: |
-          python -c "
-          import pty, os, time
-
-          master, slave = pty.openpty()
-          pid = os.fork()
-
-          if pid == 0:
-              os.close(master)
-              os.dup2(slave, 0)
-              os.dup2(slave, 1)
-              os.dup2(slave, 2)
-              os.close(slave)
-              os.execvp('flet', ['flet', 'build', 'apk', '--build-number', '1', '--build-version', '1.0.0'])
-          else:
-              os.close(slave)
-              while True:
-                  try:
-                      time.sleep(0.5)
-                      os.write(master, b'y\n')
-                      data = os.read(master, 1024)
-                      if not data:
-                          break
-                      print(data.decode('utf-8', errors='ignore'), end='')
-                  except Exception:
-                      break
-              _, status = os.waitpid(pid, 0)
-              if os.WEXITSTATUS(status) != 0:
-                  exit(os.WEXITSTATUS(status))
-          "
+          script -q -c "yes | flet build apk --build-number 1 --build-version 1.0.0" /dev/null
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/apk/*.apk
+          path: '**/*.apk'
+          

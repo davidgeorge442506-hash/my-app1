@@ -24,9 +24,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -40,6 +37,7 @@ jobs:
       - name: Build Android APK with Auto-Approve
         env:
           CI: 'true'
+          ACTIONS_ALLOW_UNSECURE_NODE_VERSION: 'true'
         run: |
           script -q -c "yes | flet build apk --build-number 1 --build-version 1.0.0" /dev/null
 
@@ -48,3 +46,4 @@ jobs:
         with:
           name: android-apk
           path: build/apk/*.apk
+          if-no-files-found: warn
